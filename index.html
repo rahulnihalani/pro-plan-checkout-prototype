@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Pro Plan Checkout — Prototype (AIDIN-18467)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink-600:#FF0058;
+    --pink-700:#D6004A;
+    --pink-50:#FFE8EF;
+    --navy-900:#262A50;
+    --navy-700:#3C4277;
+    --navy-500:#5B6099;
+    --navy-50:#EEF0F8;
+    --green-600:#1b8a5a;
+    --green-50:#eafaf1;
+    --amber-600:#b7791f;
+    --amber-50:#fff8ec;
+    --ink-900:#111827;
+    --ink-700:#374151;
+    --ink-500:#6b7280;
+    --ink-400:#9ca3af;
+    --line:#e5e7eb;
+    --line-soft:#f0f1f3;
+    --bg:#f7f7f9;
+    --card:#ffffff;
+    --red-600:#D6004A;
+    --red-50:#FFE8EF;
+    --radius:10px;
+    --shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink-900);
+    font-family:'Cabin',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  #app{min-height:100vh;display:flex;flex-direction:column;}
+
+  /* Top bar */
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);padding:12px 32px;
+    display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--navy-900);font-size:16px;}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--pink-600);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800;line-height:1;}
+  .brand-divider{width:1px;height:18px;background:var(--line);margin:0 2px;}
+  .brand-sub{font-weight:600;color:var(--ink-500);font-size:14px;}
+  .topbar-note{font-size:13px;color:var(--ink-500);font-weight:500;}
+  .proto-badge{background:var(--amber-50);color:var(--amber-600);border:1px solid #f3e2bd;
+    font-size:11px;font-weight:700;letter-spacing:.03em;padding:3px 8px;border-radius:6px;text-transform:uppercase;}
+
+  /* Stepper */
+  .stepper-wrap{background:var(--navy-700);border-bottom:none;padding:16px 0 14px;}
+  .stepper{max-width:760px;margin:0 auto;display:flex;align-items:flex-start;padding:0 32px;}
+  .step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;font-size:12px;color:rgba(255,255,255,0.55);}
+  .step .dot{width:24px;height:24px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,0.35);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:6px;z-index:1;}
+  .step .lbl{white-space:nowrap;font-weight:600;}
+  .step:not(:last-child)::after{content:"";position:absolute;top:12px;left:50%;width:100%;height:2px;background:rgba(255,255,255,0.18);z-index:0;}
+  .step.done .dot{background:#fff;border-color:#fff;color:var(--navy-700);}
+  .step.done:not(:last-child)::after{background:var(--pink-600);}
+  .step.active .dot{border-color:var(--pink-600);background:var(--pink-600);color:#fff;}
+  .step.active .lbl{color:#fff;}
+  .step.done .lbl{color:rgba(255,255,255,0.85);}
+
+  /* Main */
+  main{flex:1;display:flex;justify-content:center;padding:36px 24px 80px;}
+  .page{width:100%;max-width:760px;}
+  .back-row{margin-bottom:18px;}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--ink-500);
+    font-size:13px;font-weight:600;cursor:pointer;padding:6px 4px;}
+  .back-btn:hover{color:var(--ink-900);}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-0.01em;}
+  .subhead{color:var(--ink-500);font-size:14px;margin:0 0 26px;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;}
+  .card + .card{margin-top:16px;}
+  .btn-block{width:100%;margin-top:18px;}
+
+  /* Step 1 - plan cards */
+  .plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .plan-card{position:relative;border:2px solid var(--line);border-radius:var(--radius);padding:22px 20px;cursor:pointer;
+    background:#fff;transition:border-color .12s, box-shadow .12s, background .12s;}
+  .plan-card:hover{border-color:var(--navy-500);}
+  .plan-card.selected{border-color:var(--navy-700);box-shadow:0 0 0 3px var(--navy-50);background:var(--navy-50);}
+  .plan-badge{position:absolute;top:-11px;right:20px;background:var(--pink-600);color:#fff;font-size:11px;
+    font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.02em;}
+  .plan-name{font-size:15px;font-weight:700;color:var(--ink-900);margin-bottom:10px;}
+  .plan-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+  .plan-price{font-size:28px;font-weight:800;color:var(--ink-900);}
+  .plan-price-unit{font-size:13px;color:var(--ink-500);font-weight:500;}
+  .plan-compare{font-size:13px;color:var(--ink-500);margin-bottom:8px;}
+  .plan-compare .strike{text-decoration:line-through;color:var(--ink-400);}
+  .plan-caption{font-size:12.5px;color:var(--ink-500);}
+  .plan-save{font-size:13px;font-weight:700;color:var(--pink-600);}
+  .radio-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);position:absolute;top:20px;right:20px;flex:none;background:#fff;}
+  .plan-card.selected .radio-dot{border-color:var(--navy-700);}
+  .plan-card.selected .radio-dot::after{content:"";display:block;width:9px;height:9px;border-radius:50%;background:var(--navy-700);margin:3px;}
+
+  /* Step 2 - facilities */
+  .search-row{margin-bottom:12px;}
+  .search-input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;}
+  .search-input:focus{border-color:var(--navy-700);}
+  .select-all-row{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 14px;font-size:13.5px;}
+  .select-all-row label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink-700);cursor:pointer;}
+  .select-all-count{color:var(--ink-500);}
+  .facility-list{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .facility-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line-soft);
+    background:#fff;cursor:pointer;}
+  .facility-row:last-child{border-bottom:none;}
+  .facility-row.disabled{cursor:not-allowed;background:#fafafa;}
+  .facility-row:not(.disabled):hover{background:#fafbff;}
+  .checkbox{width:18px;height:18px;border-radius:5px;border:2px solid var(--line);flex:none;display:flex;
+    align-items:center;justify-content:center;}
+  .facility-row.checked .checkbox{background:var(--navy-700);border-color:var(--navy-700);color:#fff;font-size:12px;}
+  .facility-row.disabled .checkbox{border-color:var(--line);background:#eee;}
+  .facility-info{flex:1;min-width:0;}
+  .facility-name{font-size:14px;font-weight:600;color:var(--ink-900);}
+  .facility-loc{font-size:12px;color:var(--ink-500);}
+  .facility-price{text-align:right;font-size:14px;font-weight:700;color:var(--ink-900);white-space:nowrap;}
+  .facility-price .strike{font-size:12px;color:var(--ink-400);text-decoration:line-through;font-weight:500;margin-right:4px;}
+  .already-pro-badge{background:var(--green-50);color:var(--green-600);font-size:11px;font-weight:700;padding:3px 9px;
+    border-radius:999px;white-space:nowrap;}
+  .empty-state{padding:28px;text-align:center;color:var(--ink-500);font-size:13px;}
+  .validation-msg{color:var(--red-600);background:var(--red-50);border:1px solid #f5c6c6;font-size:13px;
+    padding:10px 14px;border-radius:8px;margin-top:12px;display:none;}
+  .validation-msg.show{display:block;}
+
+  .subtotal-row{display:flex;align-items:baseline;justify-content:space-between;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .subtotal-label{font-size:15px;font-weight:700;color:var(--ink-900);}
+  .subtotal-value{font-size:17px;font-weight:800;color:var(--ink-900);}
+  .subtotal-caption{font-size:12px;color:var(--ink-400);margin-top:2px;}
+
+  /* Step 3 - billing address */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-grid .full{grid-column:1/-1;}
+  label.field-label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-500);margin-bottom:6px;
+    text-transform:uppercase;letter-spacing:.04em;}
+  input[type=text],input[type=email]{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+    font-size:14px;outline:none;color:var(--ink-900);font-family:inherit;}
+  input[type=text]:focus,input[type=email]:focus{border-color:var(--navy-700);}
+  input.invalid{border-color:var(--red-600);background:var(--red-50);}
+  .field-error{font-size:11.5px;color:var(--red-600);margin-top:4px;}
+
+  /* Step 4 - order summary */
+  .line-item{display:flex;justify-content:space-between;font-size:14px;padding:9px 0;color:var(--ink-700);gap:12px;}
+  .line-item.total{border-top:1px solid var(--line);margin-top:6px;padding-top:14px;font-size:17px;font-weight:800;color:var(--ink-900);}
+  .os-line-item{display:flex;justify-content:space-between;font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line-soft);gap:12px;}
+  .os-line-item:last-of-type{border-bottom:none;}
+  .os-line-item .fname{color:var(--navy-700);font-weight:600;}
+  .os-line-item .fmeta{color:var(--ink-500);font-weight:400;}
+  .os-line-item .fprice{white-space:nowrap;font-weight:600;color:var(--ink-900);}
+  .os-line-item .fprice .strike{color:var(--ink-400);text-decoration:line-through;font-weight:500;margin-right:6px;}
+
+  .banner-green{background:var(--green-50);border:1px solid #cdeedd;color:var(--green-600);font-size:13px;
+    font-weight:600;padding:10px 14px;border-radius:8px;margin-bottom:16px;}
+  .banner-amber{background:var(--amber-50);border:1px solid #f3e2bd;color:var(--amber-600);font-size:13px;
+    font-weight:600;padding:10px 14px;border-radius:8px;margin:10px 0;text-align:center;}
+
+  /* Step 5 - payment method */
+  .pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  .pm-card{border:2px solid var(--line);border-radius:var(--radius);padding:20px;cursor:pointer;background:#fff;position:relative;
+    transition:background .12s, border-color .12s;}
+  .pm-card.selected{border-color:var(--navy-700);box-shadow:0 0 0 3px var(--navy-50);background:var(--navy-50);}
+  .pm-title{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .pm-desc{font-size:12.5px;color:var(--ink-500);line-height:1.5;}
+
+  .card-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .stripe-note{font-size:12px;color:var(--ink-500);margin-top:14px;display:flex;align-items:center;gap:6px;}
+
+  .tos-text{font-size:12px;color:var(--ink-500);line-height:1.55;margin:18px 0 4px;text-align:center;}
+  .tos-text a{color:var(--navy-700);text-decoration:underline;font-weight:600;}
+  .activation-caption{text-align:center;font-size:12px;color:var(--ink-400);margin-top:10px;}
+
+  /* Step 6 - review */
+  .review-eyebrow{font-size:12px;font-weight:700;color:var(--ink-500);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+  .pay-card-info{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;
+    font-size:13px;font-weight:600;margin:14px 0;background:#fbfbfc;color:var(--ink-700);}
+  .visa-chip{background:#1a1f71;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.02em;}
+
+  /* Buttons */
+  .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+  .btn{border:none;border-radius:8px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;transition:background .12s;}
+  .btn-primary{background:var(--pink-600);color:#fff;}
+  .btn-primary:hover{background:var(--pink-700);}
+  .btn-primary:disabled{background:#ffb3cd;cursor:not-allowed;}
+  .btn-secondary{background:#fff;color:var(--navy-700);border:1px solid var(--navy-700);}
+  .btn-secondary:hover{background:var(--navy-50);}
+  .btn-pay{width:100%;padding:14px;font-size:15px;}
+
+  /* Error state */
+  .error-banner{background:var(--red-50);border:1px solid #f5c6c6;color:var(--red-600);border-radius:10px;
+    padding:14px 16px;font-size:13.5px;margin-bottom:18px;}
+  .error-actions{display:flex;gap:10px;margin-top:12px;}
+  .error-actions .btn{flex:1;padding:10px 16px;font-size:13px;}
+
+  /* Success screen */
+  .success-wrap{text-align:center;padding:50px 20px;}
+  .success-icon{width:64px;height:64px;border-radius:50%;background:var(--green-50);color:var(--green-600);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:30px;}
+  .success-wrap h1{font-size:24px;margin-bottom:8px;}
+  .success-wrap p{color:var(--ink-500);font-size:14px;max-width:420px;margin:0 auto 24px;line-height:1.6;}
+  .receipt-card{max-width:420px;margin:0 auto;text-align:left;}
+
+  .flow-toggle{display:flex;justify-content:center;gap:8px;margin-bottom:22px;}
+  .flow-chip{font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;border:1px solid var(--line);
+    color:var(--ink-500);background:#fff;}
+  .flow-chip.active-cc{border-color:var(--navy-700);color:var(--navy-700);background:var(--navy-50);}
+  .flow-chip.active-inv{border-color:var(--amber-600);color:var(--amber-600);background:var(--amber-50);}
+
+  .restart-row{text-align:center;margin-top:10px;}
+  .restart-link{font-size:12.5px;color:var(--ink-400);text-decoration:underline;cursor:pointer;background:none;border:none;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark">+</div>aidin<div class="brand-divider"></div><span class="brand-sub">Pro Plan Checkout</span></div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="topbar-note">Sarah Chen · Texas Health Resources</span>
+      <span class="proto-badge">Prototype · AIDIN-18467</span>
+    </div>
+  </div>
+  <div class="stepper-wrap">
+    <div class="stepper" id="stepper"></div>
+  </div>
+  <main><div class="page" id="page"></div></main>
+</div>
+
+<script>
+const STEP_LABELS = ["Plan","Facilities","Billing Address","Order Summary","Payment","Review"];
+
+const ALL_FACILITIES = [
+  {id:1, name:"Sunrise Rehab Center", type:"SNF", city:"Arlington", state:"TX", alreadyPro:false},
+  {id:2, name:"Lakewood Home Health", type:"HHA", city:"Dallas", state:"TX", alreadyPro:false},
+  {id:3, name:"Meadows IRF", type:"IRF", city:"Fort Worth", state:"TX", alreadyPro:false},
+  {id:4, name:"Pinecrest SNF", type:"SNF", city:"Plano", state:"TX", alreadyPro:true},
+  {id:5, name:"Valley Care HHA", type:"HHA", city:"Irving", state:"TX", alreadyPro:false},
+];
+
+const state = {
+  step: 1,
+  plan: null,               // 'monthly' | 'annual'
+  search: "",
+  selectedIds: new Set(),
+  showFacilityValidation: false,
+  billing: {firstName:"Sarah", lastName:"Chen", email:"sarah.chen@texashealth.org", phone:"(817) 555-0142",
+    org:"Texas Health Resources", line1:"612 E Lamar Blvd", line2:"Suite 100", city:"Arlington", state:"TX", zip:"76011"},
+  showBillingValidation: false,
+  paymentMethod: null,      // 'card' | 'invoice'
+  card: {number:"4242 4242 4242 4242", exp:"09/28", cvc:"123"},
+  billingEmail: "billing@texashealthresources.org",
+  cardError: false,
+  processing: false,
+  done: false,
+};
+
+const MONTHLY_RATE = 425;
+const ANNUAL_RATE = 340;
+const TAX_RATE = 0.0825;
+
+function fmt(n){ return "$" + n.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmt0(n){ return "$" + n.toLocaleString("en-US"); }
+
+function isAnnualBilling(){ return state.paymentMethod === 'invoice' || state.plan === 'annual'; }
+function effectiveRate(){
+  // Invoice always recalculates to annual rate (AC12/AC14)
+  if(state.paymentMethod === 'invoice') return ANNUAL_RATE;
+  return state.plan === 'annual' ? ANNUAL_RATE : MONTHLY_RATE;
+}
+function selectedFacilities(){
+  return ALL_FACILITIES.filter(f => state.selectedIds.has(f.id));
+}
+function monthlySubtotal(){ return effectiveRate() * state.selectedIds.size; }
+// Annual plans and invoices bill the full year upfront; monthly bills the recurring monthly amount.
+function billingSubtotal(){ return isAnnualBilling() ? monthlySubtotal() * 12 : monthlySubtotal(); }
+function taxAmount(){ return billingSubtotal() * TAX_RATE; }
+function total(){ return billingSubtotal() + taxAmount(); }
+function annualSavings(){ return (MONTHLY_RATE - ANNUAL_RATE) * 12 * state.selectedIds.size; }
+
+// Step 5's subheading restates the total carried over from Step 4 (Order Summary) — it should not
+// live-recalculate as the admin toggles between Credit card / Request invoice on this screen.
+function planOnlyTotal(){
+  const rate = state.plan === 'annual' ? ANNUAL_RATE : MONTHLY_RATE;
+  const monthly = rate * state.selectedIds.size;
+  const sub = state.plan === 'annual' ? monthly * 12 : monthly;
+  return sub + sub * TAX_RATE;
+}
+
+function go(step){ state.step = step; render(); window.scrollTo(0,0); }
+
+function renderStepper(){
+  const el = document.getElementById('stepper');
+  el.innerHTML = STEP_LABELS.map((label, i) => {
+    const n = i+1;
+    let cls = 'step';
+    if(n < state.step) cls += ' done';
+    else if(n === state.step) cls += ' active';
+    return `<div class="${cls}"><div class="dot">${n < state.step ? '✓' : n}</div><div class="lbl">${label}</div></div>`;
+  }).join('');
+}
+
+function backBtn(prevStep){
+  return `<div class="back-row"><button class="back-btn" onclick="go(${prevStep})">&larr; Back</button></div>`;
+}
+
+function flowChip(){
+  if(!state.paymentMethod) return "";
+  return `<div class="flow-toggle">
+    <span class="flow-chip ${state.paymentMethod==='card'?'active-cc':''}">Credit card path</span>
+    <span class="flow-chip ${state.paymentMethod==='invoice'?'active-inv':''}">Invoice path</span>
+  </div>`;
+}
+
+/* ---------- STEP 1: Choose Plan ---------- */
+function renderStep1(){
+  const savePerFacilityYear = (MONTHLY_RATE - ANNUAL_RATE) * 12;
+  return `
+    <h1>Choose your billing plan</h1>
+    <p class="subhead">Pro Plan — per facility pricing</p>
+    <div class="card">
+      <div class="plan-grid">
+        <div class="plan-card ${state.plan==='monthly'?'selected':''}" onclick="selectPlan('monthly')">
+          <div class="radio-dot"></div>
+          <div class="plan-name">Monthly</div>
+          <div class="plan-price-row">
+            <span class="plan-price">${fmt0(MONTHLY_RATE)}</span>
+            <span class="plan-price-unit">/facility/mo</span>
+          </div>
+          <div class="plan-caption">Cancel anytime</div>
+        </div>
+        <div class="plan-card ${state.plan==='annual'?'selected':''}" onclick="selectPlan('annual')">
+          <span class="plan-badge">Best Value</span>
+          <div class="radio-dot"></div>
+          <div class="plan-name">Annual</div>
+          <div class="plan-price-row">
+            <span class="plan-price">${fmt0(ANNUAL_RATE)}</span>
+            <span class="plan-price-unit">/facility/mo</span>
+          </div>
+          <div class="plan-compare"><span class="strike">${fmt0(MONTHLY_RATE)}/mo</span> · Save 20%</div>
+          <div class="plan-save">Save ${fmt0(savePerFacilityYear)} per facility per year</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" ${!state.plan?'disabled':''} onclick="go(2)">Continue</button>
+    </div>
+  `;
+}
+function selectPlan(p){ state.plan = p; render(); }
+
+/* ---------- STEP 2: Select Facilities ---------- */
+function renderStep2(){
+  const filtered = ALL_FACILITIES.filter(f => (f.name+f.city+f.state).toLowerCase().includes(state.search.toLowerCase()));
+  const selectableCount = ALL_FACILITIES.filter(f=>!f.alreadyPro).length;
+  const allSelected = selectableCount>0 && ALL_FACILITIES.filter(f=>!f.alreadyPro).every(f=>state.selectedIds.has(f.id));
+
+  const rows = filtered.length ? filtered.map(f => {
+    const checked = state.selectedIds.has(f.id);
+    const disabled = f.alreadyPro;
+    let priceHtml;
+    if(disabled){
+      priceHtml = `<span class="already-pro-badge">Already Pro</span>`;
+    } else {
+      priceHtml = state.plan==='annual'
+        ? `<span class="strike">${fmt0(MONTHLY_RATE)}</span>${fmt0(ANNUAL_RATE)}/mo`
+        : `${fmt0(MONTHLY_RATE)}/mo`;
+    }
+    return `<div class="facility-row ${disabled?'disabled':''} ${checked?'checked':''}" onclick="${disabled?'':'toggleFacility('+f.id+')'}">
+      <div class="checkbox">${checked?'✓':''}</div>
+      <div class="facility-info">
+        <div class="facility-name" style="${disabled?'color:var(--ink-400)':''}">${f.name}</div>
+        <div class="facility-loc">${f.type} · ${f.city}, ${f.state}</div>
+      </div>
+      <div class="facility-price" style="${disabled?'color:var(--ink-400)':''}">${priceHtml}</div>
+    </div>`;
+  }).join('') : `<div class="empty-state">No facilities match "${state.search}"</div>`;
+
+  const count = state.selectedIds.size;
+  const sub = effectiveRate() * count;
+  const subhead = state.plan==='annual'
+    ? `Annual plan · ${fmt0(MONTHLY_RATE)}/mo &rarr; ${fmt0(ANNUAL_RATE)}/facility/mo (save 20%)`
+    : `Monthly plan · ${fmt0(MONTHLY_RATE)}/facility/mo`;
+
+  return `
+    ${backBtn(1)}
+    <h1>Choose facilities to upgrade</h1>
+    <p class="subhead">${subhead}</p>
+    <div class="card">
+      <div class="search-row">
+        <input class="search-input" type="text" data-field="search" placeholder="Search facilities..." value="${state.search}" oninput="updateSearch(this.value)">
+      </div>
+      <div class="select-all-row">
+        <label><input type="checkbox" ${allSelected?'checked':''} onchange="toggleSelectAll()"> Select All</label>
+        <span class="select-all-count">${count} of ${ALL_FACILITIES.length} selected</span>
+      </div>
+      <div class="facility-list">${rows}</div>
+      <div class="validation-msg ${state.showFacilityValidation?'show':''}">Please select at least one facility to continue.</div>
+      <div class="subtotal-row">
+        <div>
+          <div class="subtotal-label">Estimated Subtotal</div>
+          <div class="subtotal-caption">Before tax. Tax will be calculated after billing address is entered.</div>
+        </div>
+        <div class="subtotal-value">${fmt(sub)}/mo</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="continueFromFacilities()">Continue</button>
+    </div>
+  `;
+}
+function updateSearch(v){ state.search = v; render(); }
+function toggleFacility(id){
+  if(state.selectedIds.has(id)) state.selectedIds.delete(id);
+  else state.selectedIds.add(id);
+  render();
+}
+function toggleSelectAll(){
+  const selectable = ALL_FACILITIES.filter(f=>!f.alreadyPro);
+  const allSelected = selectable.every(f=>state.selectedIds.has(f.id));
+  if(allSelected){ selectable.forEach(f=>state.selectedIds.delete(f.id)); }
+  else { selectable.forEach(f=>state.selectedIds.add(f.id)); }
+  render();
+}
+function continueFromFacilities(){
+  if(state.selectedIds.size === 0){ state.showFacilityValidation = true; render(); return; }
+  state.showFacilityValidation = false;
+  go(3);
+}
+
+/* ---------- STEP 3: Billing contact & address ---------- */
+function renderStep3(){
+  const b = state.billing;
+  const required = ['firstName','lastName','email','phone','org','line1','city','state','zip'];
+  const err = (key) => state.showBillingValidation && !b[key];
+  const fieldInner = (key, label, placeholder, type='text') => `
+    <label class="field-label">${label}</label>
+    <input type="${type}" class="${err(key)?'invalid':''}" data-field="billing.${key}" value="${b[key]}" placeholder="${placeholder}" oninput="updateBilling('${key}', this.value)">
+    ${err(key) ? `<div class="field-error">${label} is required</div>` : ''}`;
+  const field = (key, label, placeholder, type='text') => `<div>${fieldInner(key, label, placeholder, type)}</div>`;
+  const fieldFull = (key, label, placeholder, type='text') => `<div class="full">${fieldInner(key, label, placeholder, type)}</div>`;
+  return `
+    ${backBtn(2)}
+    <h1>Billing contact &amp; address</h1>
+    <p class="subhead">Required for tax calculation and invoicing</p>
+    <div class="card">
+      <div class="form-grid">
+        ${field('firstName','First Name','Sarah')}
+        ${field('lastName','Last Name','Chen')}
+        ${fieldFull('email','Email','sarah.chen@texashealth.org','email')}
+        ${fieldFull('phone','Phone Number','(817) 555-0142')}
+        ${fieldFull('org','Organization Name','Texas Health Resources')}
+        ${fieldFull('line1','Address Line 1','612 E Lamar Blvd')}
+        <div class="full">
+          <label class="field-label">Address Line 2 (optional)</label>
+          <input type="text" data-field="billing.line2" value="${b.line2}" placeholder="Suite 100" oninput="updateBilling('line2', this.value)">
+        </div>
+        ${field('city','City','Arlington')}
+        ${field('state','State','TX')}
+        ${field('zip','ZIP Code','76011')}
+      </div>
+      <button class="btn btn-primary btn-block" onclick="continueFromBilling()">Calculate Tax &amp; Continue</button>
+    </div>
+  `;
+}
+function updateBilling(key, val){ state.billing[key] = val; render(); }
+function continueFromBilling(){
+  const b = state.billing;
+  const required = ['firstName','lastName','email','phone','org','line1','city','state','zip'];
+  const missing = required.some(k => !b[k]);
+  if(missing){ state.showBillingValidation = true; render(); return; }
+  state.showBillingValidation = false;
+  go(4);
+}
+
+/* ---------- STEP 4: Order Summary ---------- */
+function renderStep4(){
+  const facilities = selectedFacilities();
+  const rate = effectiveRate();
+  const annual = isAnnualBilling();
+  const sub = billingSubtotal();
+  const tax = taxAmount();
+  const b = state.billing;
+
+  const lineItems = facilities.map(f => `
+    <div class="os-line-item">
+      <span class="fname">${f.name} <span class="fmeta">· ${f.type} · ${f.city}, ${f.state}</span></span>
+      <span class="fprice">${fmt(rate)}/mo</span>
+    </div>
+  `).join('');
+
+  return `
+    ${backBtn(3)}
+    <h1>Order summary</h1>
+    <p class="subhead">${state.plan==='annual'?'Annual':'Monthly'} · Billing to: ${b.city}, ${b.state} ${b.zip}</p>
+    <div class="card">
+      ${lineItems}
+      <div class="line-item" style="margin-top:6px;"><span>${annual ? `Subtotal (${facilities.length} &times; 12 mo)` : 'Subtotal'}</span><span>${fmt(sub)}${annual?'':'/mo'}</span></div>
+      <div class="line-item"><span>Sales Tax</span><span>${fmt(tax)}</span></div>
+      <div class="line-item total"><span>${annual ? 'Total due today' : 'Total'}</span><span>${fmt(total())}${annual?'':'/mo'}</span></div>
+      ${state.plan==='annual' ? `<div class="banner-amber" style="margin-top:14px;">You save ${fmt0(annualSavings())} (20% off monthly)</div>` : ''}
+      <button class="btn btn-primary btn-block" onclick="go(5)">Continue to Payment</button>
+    </div>
+  `;
+}
+
+/* ---------- STEP 5: Payment Method ---------- */
+function renderStep5(){
+  const cardValid = state.card.number.replace(/\s/g,'').length >= 12 && state.card.exp && state.card.cvc.length>=3;
+  const canContinue = state.paymentMethod === 'invoice' || (state.paymentMethod === 'card' && cardValid);
+  return `
+    ${backBtn(4)}
+    <h1>Payment method</h1>
+    <p class="subhead">${state.plan==='annual'?'Annual':'Monthly'} · ${fmt(planOnlyTotal())}${state.plan==='annual'?'':'/mo'}</p>
+    <div class="card">
+      <div class="pm-grid">
+        <div class="pm-card ${state.paymentMethod==='card'?'selected':''}" onclick="selectPaymentMethod('card')">
+          <div class="pm-title">Credit card</div>
+          <div class="pm-desc">Charged ${state.plan==='annual'?'annually':'monthly'} · Facilities activated immediately</div>
+        </div>
+        <div class="pm-card ${state.paymentMethod==='invoice'?'selected':''}" onclick="selectPaymentMethod('invoice')">
+          <div class="pm-title">Request invoice</div>
+          <div class="pm-desc">We'll email an invoice to your billing contact.<br>Annual billing only · Save 20% · Net 30 terms</div>
+        </div>
+      </div>
+
+      ${state.paymentMethod==='card' ? `
+        <div class="form-grid">
+          <div class="full">
+            <label class="field-label">Card Number</label>
+            <input type="text" data-field="card.number" placeholder="4242 4242 4242 4242" value="${state.card.number}" oninput="updateCard('number', this.value)" maxlength="19">
+          </div>
+          <div>
+            <label class="field-label">Expiry</label>
+            <input type="text" data-field="card.exp" placeholder="09/28" value="${state.card.exp}" oninput="updateCard('exp', this.value)" maxlength="7">
+          </div>
+          <div>
+            <label class="field-label">CVC</label>
+            <input type="text" data-field="card.cvc" placeholder="123" value="${state.card.cvc}" oninput="updateCard('cvc', this.value)" maxlength="4">
+          </div>
+        </div>
+        <div class="stripe-note">🔒 Secured by Stripe Elements — card details never touch Aidin's servers</div>
+      ` : ''}
+
+      ${state.paymentMethod ? `<div class="tos-text">By proceeding, you agree to our <a href="#">Terms of Service</a>. Your subscription will automatically renew ${state.paymentMethod==='invoice' ? 'annually' : 'at the selected billing frequency'} until canceled.</div>` : ''}
+
+      <button class="btn btn-primary btn-block" ${!canContinue?'disabled':''} onclick="go(6)">Continue to Review</button>
+    </div>
+  `;
+}
+function selectPaymentMethod(m){ state.paymentMethod = m; render(); }
+function updateCard(key, val){ state.card[key] = val; render(); }
+
+/* ---------- STEP 6: Review Order / Review Invoice ---------- */
+function renderStep6(){
+  if(state.done) return renderSuccess();
+
+  const isCard = state.paymentMethod === 'card';
+  const rate = effectiveRate();
+  const facilities = selectedFacilities();
+  const annual = isAnnualBilling();
+  const sub = billingSubtotal();
+  const tax = taxAmount();
+  const tot = total();
+  const forcedAnnual = !isCard && state.plan === 'monthly';
+
+  const lineItems = facilities.map(f => `
+    <div class="os-line-item">
+      <span class="fname">${f.name} <span class="fmeta">· ${f.type}</span></span>
+      <span class="fprice">${forcedAnnual ? `<span class="strike">${fmt0(MONTHLY_RATE)}/mo</span>` : ''}${fmt0(rate)}/mo</span>
+    </div>
+  `).join('');
+
+  return `
+    ${backBtn(5)}
+    ${flowChip()}
+    <h1>${isCard ? 'Review order' : 'Review invoice'}</h1>
+    <p class="subhead">${isCard ? `${state.plan==='annual'?'Annual':'Monthly'} billing` : 'Annual billing · Net 30 terms'}</p>
+
+    ${state.cardError ? `
+      <div class="error-banner">
+        Payment failed. Card declined. Try a different card or request an invoice instead.
+        <div class="error-actions">
+          <button class="btn btn-primary" onclick="retryPayment()">Retry Payment</button>
+          <button class="btn btn-secondary" onclick="requestInvoiceInstead()">Request Invoice Instead</button>
+        </div>
+      </div>
+    ` : ''}
+
+    <div class="card">
+      ${forcedAnnual ? `<div class="banner-green">Price recalculated at annual rate because invoices do not qualify for monthly billing. You save 20% vs. monthly.</div>` : ''}
+
+      ${lineItems}
+
+      <div class="line-item" style="margin-top:6px;"><span>${annual ? `Subtotal (${facilities.length} &times; 12 mo)` : 'Subtotal'}</span><span>${fmt(sub)}${annual?'':'/mo'}</span></div>
+      <div class="line-item"><span>Sales Tax</span><span>${fmt(tax)}</span></div>
+      <div class="line-item total"><span>${isCard ? (annual?'Total due today':'Total') : 'Invoice total'}</span><span>${fmt(tot)}</span></div>
+
+      ${!isCard ? `<div class="banner-amber">You save ${fmt0(annualSavings())}/yr vs. monthly</div>` : (state.plan==='annual' ? `<div class="banner-amber">You save ${fmt0(annualSavings())} (20% off monthly)</div>` : '')}
+
+      ${isCard ? `<div class="pay-card-info"><span class="visa-chip">VISA</span> Visa ending in ${state.card.number.replace(/\s/g,'').slice(-4) || '4242'}</div>` : ''}
+
+      <label class="field-label" style="margin-top:16px;">Billing email where ${isCard?'receipt':'invoice'} will be sent</label>
+      <input type="email" data-field="billingEmail" placeholder="billing@texashealthresources.org" value="${state.billingEmail}" oninput="updateEmail(this.value)">
+
+      <div class="tos-text">By proceeding, you agree to our <a href="#">Terms of Service</a>. Your subscription will automatically renew ${isCard ? 'at the selected billing frequency' : 'annually'} until canceled.</div>
+
+      <button class="btn btn-primary btn-block" ${!state.billingEmail?'disabled':''} onclick="submitOrder()">
+        ${state.processing ? 'Processing…' : (isCard ? `Pay ${fmt(tot)}` : `Request Invoice — ${fmt(tot)}`)}
+      </button>
+      <div class="activation-caption">Facilities activated immediately upon ${isCard ? 'payment' : 'submitting invoice request'}.</div>
+      ${isCard ? `<div class="restart-row"><button class="restart-link" onclick="simulateDecline()">Prototype: simulate a declined card</button></div>` : ''}
+    </div>
+  `;
+}
+function updateEmail(v){ state.billingEmail = v; render(); }
+function simulateDecline(){
+  state.processing = true; render();
+  setTimeout(()=>{ state.processing=false; state.cardError = true; render(); }, 700);
+}
+function retryPayment(){ state.cardError = false; render(); }
+function requestInvoiceInstead(){ state.cardError = false; state.paymentMethod = 'invoice'; render(); }
+function submitOrder(){
+  state.cardError = false;
+  state.processing = true; render();
+  setTimeout(()=>{ state.processing = false; state.done = true; render(); }, 900);
+}
+
+/* ---------- Success ---------- */
+function renderSuccess(){
+  const isCard = state.paymentMethod === 'card';
+  const facilities = selectedFacilities();
+  const tot = total();
+  return `
+    <div class="success-wrap">
+      <div class="success-icon">✓</div>
+      <h1>${isCard ? 'Payment successful' : 'Invoice requested'}</h1>
+      <p>${isCard
+        ? `${facilities.length} facilit${facilities.length===1?'y':'ies'} ${facilities.length===1?'has':'have'} been upgraded to Pro plan and activated immediately. A receipt was sent to ${state.billingEmail}.`
+        : `${facilities.length} facilit${facilities.length===1?'y':'ies'} ${facilities.length===1?'has':'have'} been activated on Pro plan immediately. An invoice for ${fmt(tot)} was sent to ${state.billingEmail}, due within 30 days (Net 30).`}
+      </p>
+      <div class="card receipt-card">
+        <div class="review-eyebrow" style="margin-bottom:10px;">Order Summary</div>
+        ${facilities.map(f=>`<div class="os-line-item"><span class="fname">${f.name} <span class="fmeta">· ${f.type}</span></span><span class="fprice">${fmt0(effectiveRate())}/mo</span></div>`).join('')}
+        <div class="line-item total"><span>${isCard?'Charged':'Invoice total'}</span><span>${fmt(tot)}</span></div>
+      </div>
+      <div class="restart-row" style="margin-top:24px;">
+        <button class="restart-link" onclick="restart()">↺ Restart prototype</button>
+      </div>
+    </div>
+  `;
+}
+
+function restart(){
+  state.step = 1; state.plan = null; state.search=""; state.selectedIds = new Set();
+  state.showFacilityValidation=false;
+  state.billing = {firstName:"Sarah", lastName:"Chen", email:"sarah.chen@texashealth.org", phone:"(817) 555-0142",
+    org:"Texas Health Resources", line1:"612 E Lamar Blvd", line2:"Suite 100", city:"Arlington", state:"TX", zip:"76011"};
+  state.showBillingValidation = false;
+  state.paymentMethod = null; state.card = {number:"4242 4242 4242 4242", exp:"09/28", cvc:"123"};
+  state.billingEmail = "billing@texashealthresources.org";
+  state.cardError=false; state.processing=false; state.done=false;
+  render();
+}
+
+function render(){
+  renderStepper();
+  const page = document.getElementById('page');
+
+  // Re-rendering replaces the whole page's HTML on every keystroke (so live totals/validation
+  // can update), which destroys and recreates input elements — losing focus. Save the focused
+  // field + cursor position beforehand and restore it on the new element after re-render.
+  const active = document.activeElement;
+  let focusInfo = null;
+  if(active && page.contains(active) && active.dataset && active.dataset.field){
+    focusInfo = { field: active.dataset.field, start: active.selectionStart, end: active.selectionEnd };
+  }
+
+  const renderers = {1:renderStep1, 2:renderStep2, 3:renderStep3, 4:renderStep4, 5:renderStep5, 6:renderStep6};
+  page.innerHTML = renderers[state.step]();
+
+  if(focusInfo){
+    const el = page.querySelector(`[data-field="${focusInfo.field}"]`);
+    if(el){
+      el.focus();
+      if(typeof focusInfo.start === 'number' && typeof el.setSelectionRange === 'function'){
+        try { el.setSelectionRange(focusInfo.start, focusInfo.end); } catch(e){}
+      }
+    }
+  }
+}
+
+render();
+</script>
+</body>
+</html>
